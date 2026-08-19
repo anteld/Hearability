@@ -129,7 +129,7 @@
         }
 
         .send-button {
-            margin-left: 350px;
+            margin-left: 150px;
             background: #28a745;
             color: white;
         }
@@ -281,7 +281,9 @@
             return;
         }
 
-        const dataToSend = JSON.stringify(logs);
+        const dataToSend = JSON.stringify({
+            data: logs
+        });
 
         // // Send the data to the server
         // fetch("/submit", {
@@ -314,12 +316,14 @@
         const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
             method: "POST",
             headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`,
-            "Prefer": "return=minimal"
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`,
+                "Prefer": "return=minimal"
             },
-            body: dataToSend
+            body: JSON.stringify({
+                data: logs
+            })
         });
 
         if (!response.ok) {
