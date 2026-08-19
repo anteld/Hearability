@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Time Logger</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .name-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .number-button {
+            padding: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .number-button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .number-button:active {
+            transform: scale(0.97);
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        .log-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f0f2f5;
+        }
+
+        .clear-button,
+        .undo-button,
+        .send-button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .clear-button {
+            background: #dc3545;
+            color: white;
+        }
+
+        .clear-button:hover {
+            background: #b02a37;
+        }
+
+        .undo-button {
+            margin-left: 10px;
+            background: #ffc107;
+            color: #222;
+        }
+
+        .send-button {
+            margin-left: 350px;
+            background: #28a745;
+            color: white;
+        }
+
+        .undo-button:hover {
+            background: #e0a800;
+        }
+
+        .send-button:hover {
+            background: #0d4d1b;
+        }
+
+        .message {
+            color: #dc3545;
+            margin-top: 8px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Button Time Logger</h1>
+
+    <div class="name-section">
+        <label for="name">Your name</label>
+
+        <input
+            type="text"
+            id="name"
+            placeholder="Enter your name"
+        >
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <div class="buttons">
+        <button class="number-button" onclick="logButton(0)">0</button>
+        <button class="number-button" onclick="logButton(1)">1</button>
+        <button class="number-button" onclick="logButton(2)">2</button>
+        <button class="number-button" onclick="logButton(3)">3</button>
+        <button class="number-button" onclick="logButton(4)">4</button>
+        <button class="number-button" onclick="logButton(5)">5</button>
+    </div>
+
+    <h2>Log</h2>
+
+    <div class="log-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Button</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+
+            <tbody id="log">
+            </tbody>
+        </table>
+    </div>
+
+    <button class="undo-button" onclick="removeLastLog()">
+        Remove Last Entry
+    </button>
+
+    <button class="send-button" onclick="sendData()">
+        Send Data
+    </button>
+
+</div>
+
+<script>
+
+    // Load existing logs from browser storage
+    let logs = JSON.parse(localStorage.getItem("buttonLogs")) || [];
+
+    // Display logs when the page loads
+    displayLogs();
+
+
+    function logButton(buttonNumber) {
+
+        const nameInput = document.getElementById("name");
+        const message = document.getElementById("message");
+
+        const name = nameInput.value.trim();
+
+        // Make sure a name has been entered
+        if (name === "") {
+            message.textContent = "Please enter your name first.";
+            nameInput.focus();
+            return;
+        }
+
+        message.textContent = "";
+
+        // Get the current date and time
+        const now = new Date();
+
+        const logEntry = {
+            name: name,
+            button: buttonNumber,
+            date: now.toLocaleDateString(),
+            time: now.toLocaleTimeString(),
+            timestamp: now.toISOString()
+        };
+
+        // Add the new entry
+        logs.push(logEntry);
+
+        // Save the log
+        localStorage.setItem("buttonLogs", JSON.stringify(logs));
+
+        // Update the table
+        displayLogs();
+    }
+
+
+    function displayLogs() {
+
+        const logTable = document.getElementById("log");
+
+        logTable.innerHTML = "";
+
+        // Show newest entries first
+        [...logs].reverse().forEach(entry => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${escapeHTML(entry.name)}</td>
+                <td><strong>${entry.button}</strong></td>
+                <td>${entry.date}</td>
+                <td>${entry.time}</td>
+            `;
+
+            logTable.appendChild(row);
+        });
+    }
+
+    async function sendData() {
+
+        if (logs.length === 0) {
+            alert("There are no logs to send.");
+            return;
+        }
+
+        const dataToSend = JSON.stringify(logs);
+
+        // // Send the data to the server
+        // fetch("/submit", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     },
+        //     body: dataToSend
+        // })
+        // .then(response => response.json())
+        // .then(data => {
+        //     if (data.success) {
+        //         alert("Data sent successfully!");
+        //         logs = [];
+        //         localStorage.removeItem("buttonLogs");
+        //         displayLogs();
+        //     } else {
+        //         alert("Failed to send data. Please try again.");
+        //     }
+        // })
+        // .catch(error => {
+        //     console.error("Error sending data:", error);
+        //     alert("An error occurred while sending data.");
+        // });
+
+
+        const SUPABASE_URL = "https://agotmpzjwiggaofihxxe.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_Pl6IHbsW7HuOP1Ta-FdNnA_D2M3VfTr";
+
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Prefer": "return=minimal"
+            },
+            body: dataToSend
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`Supabase error: ${error}`);
+        }
+    }
+
+
+    // Remove the most recently entered log
+    function removeLastLog() {
+
+        if (logs.length === 0) {
+            alert("There are no logs to remove.");
+            return;
+        }
+
+        logs.pop();
+
+        localStorage.setItem("buttonLogs", JSON.stringify(logs));
+
+        displayLogs();
+    }
+
+
+    // // Remove all logs
+    // function clearLog() {
+
+    //     if (logs.length === 0) {
+    //         return;
+    //     }
+
+    //     if (confirm("Are you sure you want to delete the entire log?")) {
+
+    //         logs = [];
+
+    //         localStorage.removeItem("buttonLogs");
+
+    //         displayLogs();
+    //     }
+    // }
+
+
+    // Prevent names containing HTML from being interpreted as HTML
+    function escapeHTML(text) {
+
+        const div = document.createElement("div");
+
+        div.textContent = text;
+
+        return div.innerHTML;
+    }
+
+</script>
+
+</body>
+</html>
