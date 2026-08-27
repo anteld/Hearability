@@ -72,11 +72,32 @@
         }
 
         .number-button:hover {
-            background: #0056b3;
+            background: #d83848;
             transform: translateY(-2px);
         }
 
         .number-button:active {
+            transform: scale(0.97);
+        }
+
+        .numberb-button {
+            padding: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background: #dc3545;
+            color: white;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .numberb-button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .numberb-button:active {
             transform: scale(0.97);
         }
 
@@ -154,7 +175,7 @@
 
 <div class="container">
 
-    <h1>Button Time Logger</h1>
+    <h1>Hearability log</h1>
 
     <div class="name-section">
         <label for="name">Your name</label>
@@ -172,9 +193,9 @@
         <button class="number-button" onclick="logButton(0)">0</button>
         <button class="number-button" onclick="logButton(1)">1</button>
         <button class="number-button" onclick="logButton(2)">2</button>
-        <button class="number-button" onclick="logButton(3)">3</button>
-        <button class="number-button" onclick="logButton(4)">4</button>
-        <button class="number-button" onclick="logButton(5)">5</button>
+        <button class="numberb-button" onclick="logButton(3)">0</button>
+        <button class="numberb-button" onclick="logButton(4)">1</button>
+        <button class="numberb-button" onclick="logButton(5)">2</button>
     </div>
 
     <h2>Log</h2>
@@ -201,6 +222,10 @@
 
     <button class="send-button" onclick="sendData()">
         Send Data
+    </button>
+
+    <button class="clear-button" onclick="clearLog()">
+        Clear all logs
     </button>
 
 </div>
@@ -285,30 +310,6 @@
             data: logs
         });
 
-        // // Send the data to the server
-        // fetch("/submit", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     },
-        //     body: dataToSend
-        // })
-        // .then(response => response.json())
-        // .then(data => {
-        //     if (data.success) {
-        //         alert("Data sent successfully!");
-        //         logs = [];
-        //         localStorage.removeItem("buttonLogs");
-        //         displayLogs();
-        //     } else {
-        //         alert("Failed to send data. Please try again.");
-        //     }
-        // })
-        // .catch(error => {
-        //     console.error("Error sending data:", error);
-        //     alert("An error occurred while sending data.");
-        // });
-
 
         const SUPABASE_URL = "https://agotmpzjwiggaofihxxe.supabase.co";
         const SUPABASE_KEY = "sb_publishable_Pl6IHbsW7HuOP1Ta-FdNnA_D2M3VfTr";
@@ -349,22 +350,22 @@
     }
 
 
-    // // Remove all logs
-    // function clearLog() {
+    // Remove all logs
+    function clearLog() {
 
-    //     if (logs.length === 0) {
-    //         return;
-    //     }
+        if (logs.length === 0) {
+            return;
+        }
 
-    //     if (confirm("Are you sure you want to delete the entire log?")) {
+        if (confirm("Are you sure you want to delete the entire log?")) {
 
-    //         logs = [];
+            logs = [];
 
-    //         localStorage.removeItem("buttonLogs");
+            localStorage.removeItem("buttonLogs");
 
-    //         displayLogs();
-    //     }
-    // }
+            displayLogs();
+        }
+    }
 
 
     // Prevent names containing HTML from being interpreted as HTML
