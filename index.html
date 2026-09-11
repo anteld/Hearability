@@ -297,9 +297,8 @@
 
     // Display logs when the page loads
     displayLogs();
-    requestWakeLock();
 
-    function toggleListening() {
+    async function toggleListening() {
         const nameInput = document.getElementById("name");
         const message = document.getElementById("message");
         const switchInput = document.getElementById("myonoffswitch");
@@ -331,6 +330,14 @@
             time: now.toLocaleTimeString(),
             timestamp: now.toISOString()
         };
+
+        if (listening) {
+            await requestWakeLock();
+        }
+
+        if (!listening && wakeLock) {
+            await releaseWakeLock();
+        }
 
         logs.push(logEntry);
 
@@ -478,18 +485,25 @@
         return div.innerHTML;
     }
 
+    // Create a reference for the Wake Lock.
     let wakeLock = null;
- 
     // Funktion för att aktivera "Keep Awake"
     async function requestWakeLock() {
-    try {
-        // Begär skärmlås från webbläsaren
-        wakeLock = await navigator.wakeLock.request('screen');
-        console.log('Skärmen hålls nu vaken!');
-    } catch (err) {
-        // Misslyckas oftast om batteriet är kritiskt lågt
-        console.error(`${err.name}, ${err.message}`);
+        try {
+            // Begär skärmlås från webbläsaren
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Screen is now awake');
+        } catch (err) {
+            // Misslyckas oftast om batteriet är kritiskt lågt
+            console.error(`${err.name}, ${err.message}`);
+        }
     }
+
+    async function releaseWakeLock(){
+        wakeLock.release().then(() => {
+            wakeLock = null;
+        });
+        console.log('Screen is now able to sleep');
     }
 
 </script>
