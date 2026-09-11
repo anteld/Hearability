@@ -72,7 +72,7 @@
         }
 
         .number-button:hover {
-            background: #d83848;
+            background: #0056b3;
             transform: translateY(-2px);
         }
 
@@ -93,7 +93,7 @@
         }
 
         .numberb-button:hover {
-            background: #0056b3;
+            background: #a11e2b;
             transform: translateY(-2px);
         }
 
@@ -151,7 +151,7 @@
 
         .send-button {
             margin-left: 150px;
-            background: #28a745;
+            background: #00C742;
             color: white;
         }
 
@@ -167,6 +167,54 @@
             color: #dc3545;
             margin-top: 8px;
             min-height: 20px;
+        }
+
+        .onoffswitch {
+            position: relative; width: 200px;
+            -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+        }
+        .onoffswitch-checkbox {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .onoffswitch-label {
+            display: block; overflow: hidden; cursor: pointer;
+            border: 2px solid #999999; border-radius: 20px;
+        }
+        .onoffswitch-inner {
+            display: block; width: 200%; margin-left: -100%;
+            transition: margin 0.3s ease-in 0s;
+        }
+        .onoffswitch-inner:before, .onoffswitch-inner:after {
+            display: block; float: left; width: 50%; height: 30px; padding: 0; line-height: 30px;
+            font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+            box-sizing: border-box;
+        }
+        .onoffswitch-inner:before {
+            content: "Listening";
+            padding-left: 10px;
+            background-color: #00C742; color: #FFFFFF;
+        }
+        .onoffswitch-inner:after {
+            content: "Not Listening";
+            padding-right: 10px;
+            background-color: #dc3545; color: #FFFFFF;
+            text-align: right;
+        }
+        .onoffswitch-switch {
+            display: block; width: 15px; margin: 7.5px;
+            background: #FFFFFF;
+            position: absolute; top: 0; bottom: 0;
+            right: 166px;
+            border: 2px solid #999999; border-radius: 20px;
+            transition: all 0.3s ease-in 0s; 
+        }
+        .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+            margin-left: 0;
+        }
+        .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+            right: 0px; 
         }
     </style>
 </head>
@@ -189,6 +237,17 @@
         <div id="message" class="message"></div>
     </div>
 
+    <div class="onoffswitch">
+        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" onchange="toggleListening()">
+        <label class="onoffswitch-label" for="myonoffswitch">
+            <span class="onoffswitch-inner"></span>
+            <span class="onoffswitch-switch"></span>
+        </label>
+    </div>
+
+    <h6></h6>
+    <h6></h6>
+
     <div class="buttons">
         <button class="number-button" onclick="logButton(0)">0</button>
         <button class="number-button" onclick="logButton(1)">1</button>
@@ -197,6 +256,19 @@
         <button class="numberb-button" onclick="logButton(4)">1</button>
         <button class="numberb-button" onclick="logButton(5)">2</button>
     </div>
+
+    <button class="undo-button" onclick="removeLastLog()">
+        Remove Last Entry
+    </button>
+
+    <button class="send-button" onclick="sendData()">
+        Send Data
+    </button>
+
+    <button class="clear-button" onclick="clearLog()">
+        Clear all logs
+    </button>
+
 
     <h2>Log</h2>
 
@@ -216,18 +288,6 @@
         </table>
     </div>
 
-    <button class="undo-button" onclick="removeLastLog()">
-        Remove Last Entry
-    </button>
-
-    <button class="send-button" onclick="sendData()">
-        Send Data
-    </button>
-
-    <button class="clear-button" onclick="clearLog()">
-        Clear all logs
-    </button>
-
 </div>
 
 <script>
@@ -238,6 +298,45 @@
     // Display logs when the page loads
     displayLogs();
 
+    function toggleListening() {
+        const nameInput = document.getElementById("name");
+        const message = document.getElementById("message");
+        const switchInput = document.getElementById("myonoffswitch");
+
+        const name = nameInput.value.trim();
+
+        // Make sure a name has been entered
+        if (name === "") {
+            message.textContent = "Please enter your name first.";
+            nameInput.focus();
+
+            // Undo the visual switch change
+            switchInput.checked = false;
+
+            return;
+        }
+
+        message.textContent = "";
+
+        // Use the checkbox itself as the source of truth
+        const listening = switchInput.checked;
+
+        const now = new Date();
+
+        const logEntry = {
+            name: name,
+            button: "listening: " + listening,
+            date: now.toLocaleDateString(),
+            time: now.toLocaleTimeString(),
+            timestamp: now.toISOString()
+        };
+
+        logs.push(logEntry);
+
+        localStorage.setItem("buttonLogs", JSON.stringify(logs));
+
+        displayLogs();
+    }
 
     function logButton(buttonNumber) {
 
@@ -376,6 +475,20 @@
         div.textContent = text;
 
         return div.innerHTML;
+    }
+
+    let wakeLock = null;
+ 
+    // Funktion för att aktivera "Keep Awake"
+    async function requestWakeLock() {
+    try {
+        // Begär skärmlås från webbläsaren
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Skärmen hålls nu vaken!');
+    } catch (err) {
+        // Misslyckas oftast om batteriet är kritiskt lågt
+        console.error(`${err.name}, ${err.message}`);
+    }
     }
 
 </script>
