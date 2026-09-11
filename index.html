@@ -127,7 +127,9 @@
         .clear-button,
         .undo-button,
         .send-button {
-            margin-top: 20px;
+            margin-top: 15px;
+            margin-left: 0px;
+            margin-right: 10px;
             padding: 10px 15px;
             border: none;
             border-radius: 7px;
@@ -144,13 +146,11 @@
         }
 
         .undo-button {
-            margin-left: 10px;
             background: #ffc107;
             color: #222;
         }
 
         .send-button {
-            margin-left: 150px;
             background: #00C742;
             color: white;
         }
@@ -257,16 +257,16 @@
         <button class="numberb-button" onclick="logButton(5)">2</button>
     </div>
 
+    <button class="clear-button" onclick="clearLog()">
+        Clear all logs
+    </button>
+
     <button class="undo-button" onclick="removeLastLog()">
         Remove Last Entry
     </button>
 
     <button class="send-button" onclick="sendData()">
         Send Data
-    </button>
-
-    <button class="clear-button" onclick="clearLog()">
-        Clear all logs
     </button>
 
 
