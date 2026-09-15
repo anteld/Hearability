@@ -100,6 +100,13 @@
         .numberb-button:active {
             transform: scale(0.97);
         }
+        .number-button.last-pressed,
+        .numberb-button.last-pressed {
+            background: #00C742;
+            box-shadow: 0 0 10px rgba(0, 199, 66, 0.5);
+            
+        }
+
 
         h2 {
             margin-bottom: 10px;
@@ -216,6 +223,7 @@
         .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
             right: 0px; 
         }
+        
     </style>
 </head>
 
@@ -249,13 +257,19 @@
     <h6></h6>
 
     <div class="buttons">
-        <button class="number-button" onclick="logButton(0)">0</button>
-        <button class="number-button" onclick="logButton(1)">1</button>
-        <button class="number-button" onclick="logButton(2)">2</button>
-        <button class="numberb-button" onclick="logButton(3)">0</button>
-        <button class="numberb-button" onclick="logButton(4)">1</button>
-        <button class="numberb-button" onclick="logButton(5)">2</button>
+
+        <!-- Blue buttons -->
+        <button class="number-button blue-button last-pressed" onclick="logButton(0)">0</button>
+        <button class="number-button blue-button" onclick="logButton(1)">1</button>
+        <button class="number-button blue-button" onclick="logButton(2)">2</button>
+
+        <!-- Red buttons -->
+        <button class="numberb-button red-button last-pressed" onclick="logButton(3)">0</button>
+        <button class="numberb-button red-button" onclick="logButton(4)">1</button>
+        <button class="numberb-button red-button" onclick="logButton(5)">2</button>
+
     </div>
+
 
     <button class="clear-button" onclick="clearLog()">
         Clear all logs
@@ -294,6 +308,8 @@
 
     // Load existing logs from browser storage
     let logs = JSON.parse(localStorage.getItem("buttonLogs")) || [];
+    let name = localStorage.getItem("userName") || "";
+    document.getElementById("name").value = name;
 
     // Display logs when the page loads
     displayLogs();
@@ -302,6 +318,8 @@
         const nameInput = document.getElementById("name");
         const message = document.getElementById("message");
         const switchInput = document.getElementById("myonoffswitch");
+        const blueButtons = document.querySelectorAll(".blue-button");
+        const redButtons = document.querySelectorAll(".red-button");
 
         const name = nameInput.value.trim();
 
@@ -315,6 +333,8 @@
 
             return;
         }
+
+        localStorage.setItem("userName", name);
 
         message.textContent = "";
 
@@ -337,6 +357,22 @@
 
         if (!listening && wakeLock) {
             await releaseWakeLock();
+        }
+
+        if (!listening) {
+            blueButtons.forEach(button => {
+                button.classList.remove("last-pressed");
+            });
+
+            // Make the pressed blue button green.
+            blueButtons[0].classList.add("last-pressed");
+
+            redButtons.forEach(button => {
+                button.classList.remove("last-pressed");
+            });
+
+            // Make the pressed red button green.
+            redButtons[0].classList.add("last-pressed");
         }
 
         logs.push(logEntry);
@@ -387,7 +423,38 @@
 
         // Update the table
         displayLogs();
+
+        // Get all blue and red buttons
+        const blueButtons = document.querySelectorAll(".blue-button");
+        const redButtons = document.querySelectorAll(".red-button");
+
+        if (buttonNumber >= 0 && buttonNumber <= 2) {
+
+            // A blue button was pressed.
+            // Remove green from all blue buttons.
+            blueButtons.forEach(button => {
+                button.classList.remove("last-pressed");
+            });
+
+            // Make the pressed blue button green.
+            blueButtons[buttonNumber].classList.add("last-pressed");
+
+        } else if (buttonNumber >= 3 && buttonNumber <= 5) {
+
+            // A red button was pressed.
+            // Remove green from all red buttons.
+            redButtons.forEach(button => {
+                button.classList.remove("last-pressed");
+            });
+
+            // Convert 3,4,5 into 0,1,2.
+            const redButtonIndex = buttonNumber - 3;
+
+            // Make the pressed red button green.
+            redButtons[redButtonIndex].classList.add("last-pressed");
+        }
     }
+
 
 
     function displayLogs() {
@@ -448,14 +515,54 @@
 
 
     // Remove the most recently entered log
-    function removeLastLog() {
+    async function removeLastLog() {
 
         if (logs.length === 0) {
             alert("There are no logs to remove.");
             return;
         }
+        const blueButtons = document.querySelectorAll(".blue-button");
+        const redButtons = document.querySelectorAll(".red-button");
+        const switchInput = document.getElementById("myonoffswitch");
 
+        last_log = logs[logs.length - 1];
         logs.pop();
+
+        // convert last_log.button to string and check if length is 1
+        if (last_log.button.toString().length === 1){
+            SetLastLogButtons();
+        }
+        else{
+            switchInput.checked = !switchInput.checked;
+            const listening = switchInput.checked;
+
+            if (listening) {
+                await requestWakeLock();
+            }
+
+            if (!listening && wakeLock) {
+                await releaseWakeLock();
+            }
+
+            if (!listening) {
+                blueButtons.forEach(button => {
+                    button.classList.remove("last-pressed");
+                });
+
+                // Make the pressed blue button green.
+                blueButtons[0].classList.add("last-pressed");
+
+                redButtons.forEach(button => {
+                    button.classList.remove("last-pressed");
+                });
+
+                // Make the pressed red button green.
+                redButtons[0].classList.add("last-pressed");
+            }
+            else {
+                SetLastLogButtons();
+            }
+        }
 
         localStorage.setItem("buttonLogs", JSON.stringify(logs));
 
@@ -478,6 +585,60 @@
 
             displayLogs();
         }
+    }
+
+    function SetLastLogButtons(){
+        const blueButtons = document.querySelectorAll(".blue-button");
+        const redButtons = document.querySelectorAll(".red-button");
+        blueButtons.forEach(button => {
+                        button.classList.remove("last-pressed");
+        });
+        redButtons.forEach(button => {
+            button.classList.remove("last-pressed");
+        });
+        blueButtons[0].classList.add("last-pressed");
+        redButtons[0].classList.add("last-pressed");
+        for (let i = logs.length - 1; i >= 0; i--) {
+            const last_log = logs[i];
+            if (last_log.button.toString().length === 1){
+                const buttonNumber = last_log.button;
+                if (buttonNumber >= 0 && buttonNumber <= 2) {
+
+                    // A blue button was pressed.
+                    // Remove green from all blue buttons.
+                    blueButtons.forEach(button => {
+                        button.classList.remove("last-pressed");
+                    });
+
+                    // Make the pressed blue button green.
+                    blueButtons[buttonNumber].classList.add("last-pressed");
+                    break;
+                }
+            }
+        }
+        for (let i = logs.length - 1; i >= 0; i--) {
+            const last_log = logs[i];
+            if (last_log.button.toString().length === 1){
+                const buttonNumber = last_log.button;
+                if (buttonNumber >= 3 && buttonNumber <= 5) {
+
+                    // A red button was pressed.
+                    // Remove green from all red buttons.
+                    redButtons.forEach(button => {
+                        button.classList.remove("last-pressed");
+                    });
+
+                    // Convert 3,4,5 into 0,1,2.
+                    const redButtonIndex = buttonNumber - 3;
+
+                    // Make the pressed red button green.
+                    redButtons[redButtonIndex].classList.add("last-pressed");
+                    break;
+                }
+            }
+        }
+
+
     }
 
 
@@ -506,6 +667,10 @@
     }
 
     async function releaseWakeLock(){
+        if (!wakeLock) {
+            console.log('No wake lock to release');
+            return;
+        }
         wakeLock.release().then(() => {
             wakeLock = null;
         });
