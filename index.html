@@ -192,12 +192,12 @@
             box-sizing: border-box;
         }
         .onoffswitch-inner:before {
-            content: "Listening";
+            content: "Active";
             padding-left: 10px;
             background-color: #00C742; color: #FFFFFF;
         }
         .onoffswitch-inner:after {
-            content: "Not Listening";
+            content: "Not Active";
             padding-right: 10px;
             background-color: #dc3545; color: #FFFFFF;
             text-align: right;
@@ -223,7 +223,7 @@
 
 <div class="container">
 
-    <h1>Hearability log</h1>
+    <h1>Log Tool</h1>
 
     <div class="name-section">
         <label for="name">Your name</label>
@@ -325,7 +325,7 @@
 
         const logEntry = {
             name: name,
-            button: "listening: " + listening,
+            button: "active: " + listening,
             date: now.toLocaleDateString(),
             time: now.toLocaleTimeString(),
             timestamp: now.toISOString()
@@ -352,11 +352,17 @@
         const message = document.getElementById("message");
 
         const name = nameInput.value.trim();
+        const switchInput = document.getElementById("myonoffswitch");
 
         // Make sure a name has been entered
         if (name === "") {
             message.textContent = "Please enter your name first.";
             nameInput.focus();
+            return;
+        }
+
+        if (!switchInput.checked) {
+            message.textContent = "Please make sure the 'Active' switch is turned on";
             return;
         }
 
