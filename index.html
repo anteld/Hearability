@@ -347,7 +347,12 @@
             name: name,
             button: "active: " + listening,
             date: now.toLocaleDateString(),
-            time: now.toLocaleTimeString(),
+            time: now.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false
+            }) + "." + Math.floor(now.getMilliseconds() / 100),
             timestamp: now.toISOString()
         };
 
@@ -411,7 +416,12 @@
             name: name,
             button: buttonNumber,
             date: now.toLocaleDateString(),
-            time: now.toLocaleTimeString(),
+            time: now.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false
+            }) + "." + Math.floor(now.getMilliseconds() / 10),
             timestamp: now.toISOString()
         };
 
